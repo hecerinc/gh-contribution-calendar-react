@@ -1,0 +1,69 @@
+/* src/components/ContributionGraph.css */
+
+.contribution-graph-wrapper {
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
+	padding: 20px;
+	text-align: center;
+}
+
+.month-labels {
+	display: flex;
+	justify-content: space-between;
+	margin-bottom: 10px;
+	font-size: 12px;
+}
+
+.month-label {
+	width: 30px;
+}
+
+.contribution-graph {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+}
+
+.weekday-labels {
+	display: flex;
+	flex-direction: column;
+	justify-content: space-between;
+	margin-right: 10px;
+	font-size: 12px;
+}
+
+.weekday-label {
+	height: 30px;
+	text-align: center;
+}
+
+.grid {
+	display: flex;
+	flex-direction: row;
+}
+
+.grid-body {
+	display: flex;
+	flex-direction: row;
+}
+
+.grid-column {
+	display: flex;
+	flex-direction: column;
+}
+
+.grid-row {
+	display: flex;
+}
+
+.contribution-day {
+	width: 15px;
+	height: 15px;
+	margin: 2px;
+	border-radius: 3px;
+}
+
+.contribution-day.empty {
+	background-color: transparent;
+}
