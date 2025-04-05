@@ -1,5 +1,6 @@
 import React from 'react';
 import { DateTime } from 'luxon';
+import { Tooltip } from '@fluentui/react-components';
 
 function getRandomInt(min, max) {
 	const minCeiled = Math.ceil(min);
@@ -42,8 +43,8 @@ const currentDate = DateTime.now();
 // const currentDate = DateTime.local(2025, 3, 30);
 
 // -52 weeks
-const pastDate = DateTime.fromJSDate(new Date(currentDate.toMillis() - 52 * 7 * 24 * 60 * 60 * 1000));
-let START_DATE = pastDate;
+// let START_DATE = DateTime.fromJSDate(new Date(currentDate.toMillis() - 52 * 7 * 24 * 60 * 60 * 1000));
+let START_DATE = DateTime.fromISO('2024-01-01');
 
 // TODO: change this to localWeekday -1
 if (START_DATE.weekday !== 7 /* Sunday */) {
@@ -55,7 +56,27 @@ if (START_DATE.weekday !== 7 /* Sunday */) {
 // const formattedDate = pastDate.toLocaleDateString();
 // console.log('52 weeks ago!', formattedDate);
 
-const renderWeeksRow = (dowIndex: number) => {
+// Given some value for contribution, return correct level (bins the data)
+const map2Level = (val: number | undefined): number => {
+	if (val === undefined) {
+		return 0;
+	}
+	switch (true) {
+		case val <= 5:
+			return 1;
+		case val > 5 && val <= 10:
+			return 2;
+		case val > 10 && val <= 15:
+			return 2;
+		case val > 15 && val <= 20:
+			return 3;
+		case val > 20:
+			return 4;
+		default:
+			return 0;
+	}
+};
+const renderWeeksRow = (dowIndex: number, data: Map<string, ContributionData>) => {
 	return Array.from({ length: WEEKS_TO_SHOW }, (_v, i) => i).map((weekIndex) => {
 		const daysToAdd = weekIndex * 7 + dowIndex;
 		const day = START_DATE.plus({ days: daysToAdd });
@@ -68,22 +89,34 @@ const renderWeeksRow = (dowIndex: number) => {
 			}
 		}
 
+		const cardinality = data.get(day.toISODate()!)?.cardinality;
+
 		return shouldRender ? (
-			<td
+			<Tooltip
+				withArrow
+				appearance="inverted"
+				content={day.toISODate() + ` (${cardinality ?? 0})`}
+				relationship="label"
 				key={`doy-${dowIndex}-${weekIndex}`}
-				tabIndex={weekIndex == 0 ? 0 : -1}
-				data-ix={weekIndex}
-				aria-selected="false"
-				title={day.toISODate() ?? ''}
-				aria-describedby="contribution-graph-legend-level-2"
-				style={{ width: 10 }}
-				data-date={day.toISODate()}
-				id={`contribution-day-component-${dowIndex}-${weekIndex}`}
-				data-level={getRandomInt(0, 4 + 1)} // depth (color scale)
-				role="gridcell"
-				className="ContributionCalendar-day"
-				aria-labelledby="tooltip-94c39a0d-505f-494b-877b-47ae02f4aaf8"
-			/>
+			>
+				<td
+					// tabIndex={weekIndex == 0 ? 0 : -1}
+					tabIndex={0}
+					data-ix={weekIndex}
+					aria-selected="false"
+					// title={String(daysToAdd)}
+					title={day.toISODate() ?? ''}
+					aria-describedby="contribution-graph-legend-level-2"
+					style={{ width: 10 }}
+					data-date={day.toISODate()}
+					id={`contribution-day-component-${dowIndex}-${weekIndex}`}
+					data-level={map2Level(cardinality)} // depth (color scale)
+					/* data-level={getRandomInt(0, 4 + 1)} // depth (color scale) */
+					role="gridcell"
+					className="ContributionCalendar-day"
+					aria-labelledby="tooltip-94c39a0d-505f-494b-877b-47ae02f4aaf8"
+				/>
+			</Tooltip>
 		) : null;
 	});
 };
@@ -95,6 +128,9 @@ const renderWeeksRow = (dowIndex: number) => {
 const calcMonthWeekSpans = (startOfWeek: DateTime): number[] => {
 	// The rule to follow here is basically whatever the first day of the week's month is,
 	// we will declare that entire week as belonging to that month, even if it changes midweek.
+
+	// TODO: actually, I think the rule is slightly more complex, in that it will take the month with
+	// majority dates in the week, so if Sunday is 3/31, then that week will be labeled Apr, not Mar
 	const result: number[] = [];
 	let j = 0;
 	for (let currMonth = startOfWeek.month - 1, weekIterator = startOfWeek, i = 0; i < WEEKS_TO_SHOW; i++) {
@@ -114,8 +150,12 @@ const calcMonthWeekSpans = (startOfWeek: DateTime): number[] => {
 const COL_SPANS = calcMonthWeekSpans(START_DATE);
 
 // - 1 because luxon is not 0-based months like JS
-let currentMonthIndex = pastDate.month - 1;
-export const ContributionGraphGH: React.FC<{}> = (props) => {
+let currentMonthIndex = START_DATE.month - 1;
+export type ContributionData = { cardinality?: number; amount?: number; 'effective.date'?: string };
+interface ContributionGraphGHProps {
+	data: Map<string, ContributionData>;
+}
+export const ContributionGraphGH: React.FC<ContributionGraphGHProps> = ({ data }) => {
 	return (
 		<div className="ContributionGraph">
 			<div className="border py-2 graph-before-activity-overview">
@@ -167,7 +207,7 @@ export const ContributionGraphGH: React.FC<{}> = (props) => {
 													{weekdays[dowIndex].substring(0, 3)}
 												</span>
 											</td>
-											{renderWeeksRow(dowIndex)}
+											{renderWeeksRow(dowIndex, data)}
 										</tr>
 									);
 								})}
