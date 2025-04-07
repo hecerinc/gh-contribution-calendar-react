@@ -84,7 +84,7 @@ const renderWeeksRow = (dowIndex: number, data: Map<string, ContributionData>) =
 		if (weekIndex === WEEKS_TO_SHOW - 1) {
 			// handle the case for the current week (only render up to today)
 			const twd: number = currentDate.weekday === 7 ? 0 : currentDate.weekday;
-			if (!(dowIndex <= twd)) {
+			if (day > currentDate) {
 				shouldRender = false;
 			}
 		}
@@ -111,7 +111,7 @@ const renderWeeksRow = (dowIndex: number, data: Map<string, ContributionData>) =
 					data-date={day.toISODate()}
 					id={`contribution-day-component-${dowIndex}-${weekIndex}`}
 					data-level={map2Level(cardinality)} // depth (color scale)
-					/* data-level={getRandomInt(0, 4 + 1)} // depth (color scale) */
+					// data-level={getRandomInt(0, 4 + 1)} // depth (color scale)
 					role="gridcell"
 					className="ContributionCalendar-day"
 					aria-labelledby="tooltip-94c39a0d-505f-494b-877b-47ae02f4aaf8"

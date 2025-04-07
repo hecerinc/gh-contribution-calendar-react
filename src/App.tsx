@@ -16,6 +16,10 @@ const App: React.FC = () => {
 
 	return (
 		<div className="App">
+			<label className="startDateLabel">
+				Start date
+				<input className="startDatePicker" type="date" name="startDate" />
+			</label>
 			<ContributionGraph data={processedResults2024} />
 		</div>
 	);

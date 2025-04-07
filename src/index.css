@@ -121,3 +121,9 @@ label {
 	background-color: var(--color-calendar-graph-day-L4-bg);
 	outline: 1px solid var(--color-calendar-graph-day-L4-border);
 }
+
+.startDateLabel {
+}
+.startDatePicker {
+	display: block;
+}
